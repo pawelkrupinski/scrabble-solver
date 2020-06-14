@@ -1,0 +1,15 @@
+3,tw,2,tl,1,tl,2,tw,3
+2,dl,2,dw,3,dw,2,dl,2
+1,dl,2,dl,5,dl,2,dl,1
+tw,2,tl,3,dw,3,tl,2,tw
+2,dl,3,dl,1,dl,3,dl,2
+1,dw,3,tl,3,tl,3,dw,1
+tl,3,dl,5,dl,3,tl
+3,dw,7,dw,3
+tl,3,dl,5,dl,3,tl
+1,dw,3,tl,3,tl,3,dw,1
+2,dl,3,dl,1,dl,3,dl,2
+tw,2,tl,3,dw,3,tl,2,tw
+1,dl,2,dl,5,dl,2,dl,1
+2,dl,2,dw,3,dw,2,dl,2
+3,tw,2,tl,1,tl,2,tw,3
