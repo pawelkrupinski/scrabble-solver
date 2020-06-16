@@ -1,12 +1,14 @@
 package net.pawel.scrabble
 
-import java.io.File
+import java.io.{File, StringBufferInputStream, StringReader}
 import java.nio.file.{Path, Paths}
 
 import scala.io.Source
 
 object LoadBoard {
   val Filename = "games/current.txt"
+
+  lazy val parseBoard = new ParseBoard()
 
   def apply(): Option[Board] = apply(Filename)
 
@@ -21,6 +23,8 @@ object LoadBoard {
       Some(parseBoard(lines))
     } else None
   }
+
+  def fromString(string: String) = parseBoard(string.split("\n").toList.filterNot(_.isEmpty))
 }
 
 class ParseBoard() {

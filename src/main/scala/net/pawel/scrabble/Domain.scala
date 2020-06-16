@@ -29,6 +29,12 @@ case class Board(tiles: List[List[Option[Tile]]] = List.fill(15)(List.fill(15)(N
   def maybeColumn(index: Int): Option[List[Option[Tile]]] =
     if (index < 0 || index > 14) None else Some(column(index))
 
+  def add(word: String, rowIndex: Int, columnIndex: Int): Board =
+    add(Tiles.tiles(word), rowIndex, columnIndex)
+
+  def addDown(word: String, rowIndex: Int, columnIndex: Int): Board =
+    transposed().add(Tiles.tiles(word), columnIndex, rowIndex).transposed()
+
   def add(word: List[Tile], rowIndex: Int, columnIndex: Int): Board = {
     copy(tiles = tiles.updated(rowIndex, updateRow(row(rowIndex), columnIndex, word)))
   }
@@ -48,10 +54,11 @@ object Word {
 case class Word(letters: List[Tile]) {
   def score(cells: List[Cell]): Int = {
     val startScore = basicScore()
-    val result = letters.zip(cells).foldLeft(startScore)((currentScore, tuple) => {
+    val currentScore = letters.zip(cells).foldLeft(startScore)((currentScore, tuple) => {
       val (tile, cell) = tuple
-      cell.score(currentScore, tile.score)
+      cell.letterScore(currentScore, tile.score)
     })
+    val result = cells.foldLeft(currentScore)((currentScore, cell) => cell.wordScore(currentScore))
     result
   }
 
@@ -73,6 +80,7 @@ trait Direction {
 
   def flip: Direction
 }
+
 case object Down extends Direction {
   override def flip: Direction = Across
 
@@ -86,6 +94,7 @@ case object Down extends Direction {
       }
   }
 }
+
 case object Across extends Direction {
   override def flip: Direction = Down
 
@@ -101,13 +110,17 @@ case object Across extends Direction {
 
 }
 
-case class WordPlayed(row: Int, column: Int, word: Word, direction: Direction = Across) {
+case class WordPlayed(row: Int, column: Int, word: Word, direction: Direction = Across,
+                      allLettersUsed: Boolean = false) {
   def score(boardDefinition: BoardDefinition,
             previousBoard: Board): Int = {
     val cells = direction
        .cellsMatching(boardDefinition, previousBoard, row, column, word.length())
-    word.score(cells)
+    val allLettersUsedBonus = if (allLettersUsed) 35 else 0
+    word.score(cells) + allLettersUsedBonus
   }
+
+  def scoreNoBonuses(): Int = word.basicScore()
 
   def lastIndex: Int = {
     val startIndex = direction match {
@@ -132,7 +145,8 @@ case class Play(game: Game, word: WordPlayed, wordsAcross: List[WordPlayed]) {
 
   def score(boardDefinition: BoardDefinition, previousBoard: Board): ScoredPlay = {
     val words = word :: wordsAcross
-    ScoredPlay(this, words.map(_.score(boardDefinition, previousBoard)).sum)
+    val score = words.map(_.score(boardDefinition, previousBoard)).sum
+    ScoredPlay(this, score)
   }
 }
 
