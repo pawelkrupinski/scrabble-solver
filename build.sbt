@@ -1,6 +1,6 @@
 scalaVersion := "2.13.1"
 
-name := "scala-project"
+name := "scrabble-solver"
 organization := "net.pawel"
 version := "1.0"
 
