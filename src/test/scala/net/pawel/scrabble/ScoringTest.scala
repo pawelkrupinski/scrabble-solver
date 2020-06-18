@@ -8,7 +8,7 @@ class ScoringTest extends AnyFlatSpec with Matchers with MockitoSugar {
 
   val boardDefinition = LoadBoardDefinition()
 
-  "Bla" should "bla" in {
+  "Scoring" should "apply bonuses to crossing words for all the newly placed letters" in {
     val words = Words.apply(List(
       "zoea",
       "za",
