@@ -1,31 +1,12 @@
 package net.pawel.scrabble
 
+case class Range(startIndex: Int, endIndex: Int, tiles: List[Tile])
+
 class CalculateCrossingWords(val game: Game,
                              val wordsService: Words,
                              val wordsAcross: WordsAcross,
                              val tilesWithAdjacents: TilesWithAdjacents) {
   val board = game.board
-
-  case class Range(startIndex: Int, endIndex: Int, tiles: List[Tile])
-
-  def groupConsecutive(row: List[Option[Tile]],
-                       index: Int = 0,
-                       startIndex: Int = -1,
-                       rangeTiles: List[Tile] = Nil,
-                       result: List[Range] = Nil): List[Range] = {
-    val inRange = startIndex != -1
-
-    def range() = Range(startIndex, index - 1, rangeTiles)
-
-    row match {
-      case Nil if inRange => result ++ List(range)
-      case Nil => result
-      case Some(head) :: tail if inRange => groupConsecutive(tail, index + 1, startIndex, rangeTiles ::: List(head), result)
-      case Some(head) :: tail if !inRange => groupConsecutive(tail, index + 1, index, List(head), result)
-      case None :: tail if inRange => groupConsecutive(tail, index + 1, -1, Nil, result ++ List(range()))
-      case None :: tail if !inRange => groupConsecutive(tail, index + 1, -1, rangeTiles, result)
-    }
-  }
 
   def wordFits(word: List[Tile], row: List[Option[Tile]]): Boolean =
     word.zip(row).forall {
@@ -131,7 +112,7 @@ class CalculateCrossingWords(val game: Game,
 
   def calculateCrossingWords(letters: String, rowIndex: Int): List[Play] = {
     val row = board.row(rowIndex)
-    val ranges = groupConsecutive(row)
+    val ranges = FindRanges(row)
 
     handleRanges(ranges, rowIndex, row, letters)
   }
