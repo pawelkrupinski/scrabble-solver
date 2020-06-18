@@ -1,7 +1,5 @@
 package net.pawel.scrabble
 
-import net.pawel.scrabble.Main.runMain
-
 object Main {
   def main(args: Array[String]): Unit = {
     val letters = "anadoee"
