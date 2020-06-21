@@ -25,4 +25,4 @@ project/plugins/project/
 .idea
 **/.DS_Store
 games
-src/main/scala/net/pawel/scrabble/Games.scala
+src/main/scala/net/pawel/scrabble/games

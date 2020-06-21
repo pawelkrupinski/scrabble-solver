@@ -1,7 +1,10 @@
-package net.pawel.scrabble
+package net.pawel.scrabble.load
 
-import java.io.{File, StringBufferInputStream, StringReader}
-import java.nio.file.{Path, Paths}
+import java.io.File
+import java.nio.file.Paths
+
+import net.pawel.scrabble.services.Tiles
+import net.pawel.scrabble.{Board, Tile}
 
 import scala.io.Source
 

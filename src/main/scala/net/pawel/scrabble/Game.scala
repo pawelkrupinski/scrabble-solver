@@ -1,12 +1,9 @@
 package net.pawel.scrabble
 
-object Main {
-  def main(args: Array[String]): Unit = {
-    val letters = "anadoee"
-    val filename = "current.txt"
+import net.pawel.scrabble.load.{LoadBoard, LoadBoardDefinition, PrintBoard}
+import net.pawel.scrabble.services.{CalculateAdjacentWords, CalculateCrossingWords, Tiles, TilesWithAdjacents, Words, WordsAcross, WordsAcrossAreValid}
 
-    runMain(letters, filename)
-  }
+object Main {
 
   def runMain(letters: String, filename: String): Unit = {
     val definition: BoardDefinition = LoadBoardDefinition()
@@ -32,13 +29,7 @@ object Main {
     println(s"$score ($row, $column, $direction) $string : $words")
   }
 
-  def mainLoop(game: Game, startLetters: String = "") = {
-    var letters = startLetters
-
-    if (game.board.isNotEmpty()) {
-      printGame(game)
-    }
-
+  def mainLoop(game: Game, letters: String = "") = {
     val options = game.sortedOptions(letters)
     printOptions(options)
   }
@@ -67,11 +58,12 @@ case class Game(wordsService: Words = Words.makeWords(),
     val tilesWithAdjacents = new TilesWithAdjacents(board)
     val wordsAcross = new WordsAcross(board, wordsService)
     val calculateAdjacentWords = new CalculateAdjacentWords(this, tilesWithAdjacents, wordsAcross)
-    val calculateCrossingWords = new CalculateCrossingWords(this, wordsService, wordsAcross, tilesWithAdjacents)
+    val wordsAcrossAreValid = new WordsAcrossAreValid(this, wordsService, wordsAcross, tilesWithAdjacents)
+    val calculateCrossingWords = new CalculateCrossingWords(this, wordsService, wordsAcrossAreValid)
 
     val words = wordsService.wordsSpelledBy(letters)
     (0 to 14).flatMap(rowIndex => {
-      calculateAdjacentWords.adjacentWordOptions(words, rowIndex, 7) ++
+      calculateAdjacentWords.adjacentWordOptions(words, rowIndex) ++
         calculateCrossingWords.calculateCrossingWords(letters, rowIndex)
     }).toList
   }

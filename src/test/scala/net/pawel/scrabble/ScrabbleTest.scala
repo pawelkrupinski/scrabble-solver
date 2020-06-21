@@ -1,5 +1,6 @@
 package net.pawel.scrabble
 
+import net.pawel.scrabble.load.{LoadBoard, LoadBoardDefinition}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
@@ -47,7 +48,15 @@ class ScrabbleTest extends AnyFlatSpec with Matchers with MockitoSugar {
     val options = game.options(letters)
     val optionWords = options.map(_.word.string())
     options.length shouldBe 12
-    optionWords.toSet shouldBe words.words.toSet
+    optionWords.toSet shouldBe Set(
+      "efa",
+      "efagb",
+      "aebfg",
+      "aebfghc",
+      "aebfghci",
+      "def",
+      "efdg",
+      "efdgh")
   }
 
   "Scoring" should "should apply letter multiplication before word multiplication" in {

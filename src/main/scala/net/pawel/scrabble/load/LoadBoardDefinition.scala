@@ -1,4 +1,6 @@
-package net.pawel.scrabble
+package net.pawel.scrabble.load
+
+import net.pawel.scrabble._
 
 import scala.io.Source
 

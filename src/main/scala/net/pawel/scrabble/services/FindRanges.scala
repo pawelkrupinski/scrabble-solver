@@ -1,4 +1,6 @@
-package net.pawel.scrabble
+package net.pawel.scrabble.services
+
+import net.pawel.scrabble.Tile
 
 object FindRanges {
 

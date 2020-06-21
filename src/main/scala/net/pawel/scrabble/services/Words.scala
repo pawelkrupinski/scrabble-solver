@@ -1,4 +1,6 @@
-package net.pawel.scrabble
+package net.pawel.scrabble.services
+
+import net.pawel.scrabble.{Cell, WordPlayed}
 
 import scala.collection.immutable.TreeSet
 import scala.io.Source
@@ -19,14 +21,12 @@ object Words {
   def makeWords() = Words(words)
 }
 
-class Words(val words: List[String]) {
-  val wordsSortedSet = TreeSet[String]() ++ words
+class Words(private val words: List[String]) {
+  private val wordsSortedSet = TreeSet[String]() ++ words
 
   def isValid(word: String): Boolean = wordsSortedSet.contains(word)
 
-  def matchRegex(regex: String) =
-    words.filter(_.matches(regex))
-
+  def isValid(word: WordPlayed): Boolean = isValid(word.string())
 
   def wordsSpelledBy(letters: String) =
     words.filter(possibleMatch(letters)).filter(exactMatch(letters))

@@ -1,5 +1,7 @@
 package net.pawel.scrabble
 
+import net.pawel.scrabble.services.Tiles
+
 case class BoardDefinition(private val cells: List[List[Cell]]) {
   def transposed(): BoardDefinition = copy(cells = cellsTransposed)
 
@@ -26,6 +28,7 @@ case class Board(tiles: List[List[Option[Tile]]] = List.fill(15)(List.fill(15)(N
 
   def maybeRow(index: Int): Option[List[Option[Tile]]] =
     if (index < 0 || index > 14) None else Some(row(index))
+
   def maybeColumn(index: Int): Option[List[Option[Tile]]] =
     if (index < 0 || index > 14) None else Some(column(index))
 

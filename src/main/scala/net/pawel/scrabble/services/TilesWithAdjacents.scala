@@ -1,4 +1,6 @@
-package net.pawel.scrabble
+package net.pawel.scrabble.services
+
+import net.pawel.scrabble.{Board, WordPlayed}
 
 class TilesWithAdjacents(val board: Board) {
 

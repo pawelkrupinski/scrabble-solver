@@ -1,5 +1,6 @@
 package net.pawel.scrabble
 
+import net.pawel.scrabble.load.LoadBoardDefinition
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
