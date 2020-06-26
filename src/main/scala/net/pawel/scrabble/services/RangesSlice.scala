@@ -6,7 +6,8 @@ case class RangesSlice(private val ranges: List[Range],
                        private val firstRangeIndex: Int,
                        private val lastRangeIndex: Int,
                        private val wordsService: Words,
-                       private val wordsAcrossAreValid: WordsAcrossAreValid) {
+                       private val wordsAcrossAreValid: WordsAcrossAreValid,
+                       private val createPlay: CreatePlay) {
 
   val isFirst = firstRangeIndex == 0
   val isLast = lastRangeIndex == ranges.length - 1
@@ -16,7 +17,7 @@ case class RangesSlice(private val ranges: List[Range],
 
   def options(rowIndex: Int,
               row: List[Option[Tile]],
-              letters: String): List[Play] = {
+              letters: String): Iterator[Play] = {
     val before = gapBefore()
     val after = gapAfter()
     val startIndex = firstRange.startIndex
@@ -27,14 +28,15 @@ case class RangesSlice(private val ranges: List[Range],
       .map(tile => tile.map(_.letter).getOrElse('.'))
       .mkString(s".{0,$before}", "", s".{0,$after}")
     val allLetters = rangeLetters + letters
-    val onlyOneRange = firstRangeIndex == lastRangeIndex
-    wordsService.wordsSpelledBy(allLetters)
+    wordsService.iteratorWordsSpelledBy(allLetters)
       .filter(_.matches(regex))
       .filterNot(word => {
+        val onlyOneRange = firstRangeIndex == lastRangeIndex
         val wordCoversEntireRangesSpan = word.length == endIndex - startIndex
         onlyOneRange && wordCoversEntireRangesSpan
       })
-      .flatMap(fitsInTheRow(rowIndex, row, startIndex - before, endIndex + after, rangeLetters.length + 7))
+      .flatMap(fitsInTheRow(rowIndex, row, startIndex - before, endIndex + after,
+        rangeLetters.length + 7))
   }
 
 
@@ -60,7 +62,7 @@ case class RangesSlice(private val ranges: List[Range],
                            row: List[Option[Tile]],
                            columnStartIndex: Int,
                            columnEndIndex: Int,
-                           lengthForBonus: Int)(word: String): List[Play] = {
+                           lengthForBonus: Int)(word: String): Iterator[Play] = {
     val tiles = Tiles.tiles(word)
     val wordLength = word.length
     val start = columnStartIndex
@@ -73,15 +75,22 @@ case class RangesSlice(private val ranges: List[Range],
       (startIndex == 0 || row(startIndex - 1).isEmpty) &&
         (endIndex == 14 || row(endIndex + 1).isEmpty)
 
+    def wordIsValid(columnIndex: Int) =
+      wordHasAGapBeforeAndAfter(columnIndex, columnIndex + word.length - 1) &&
+        wordTouchesAnExistingLetter(columnIndex) &&
+        wordFits(tiles, row.drop(columnIndex))
+
+    def toWordPlayed(columnIndex: Int) = {
+      val allLettersUsed = tiles.length == lengthForBonus
+      WordPlayed(rowIndex, columnIndex, Word(tiles), Across, allLettersUsed)
+    }
+
     (start to end)
-      .flatMap(columnIndex =>
-        if (wordHasAGapBeforeAndAfter(columnIndex, columnIndex + word.length - 1) &&
-          wordTouchesAnExistingLetter(columnIndex) &&
-          wordFits(tiles, row.drop(columnIndex))) {
-          val allLettersUsed = tiles.length == lengthForBonus
-          List(WordPlayed(rowIndex, columnIndex, Word(tiles), Across, allLettersUsed))
-        } else Nil
-      ).toList.flatMap(wordsAcrossAreValid.apply)
+      .iterator
+      .filter(wordIsValid)
+      .map(toWordPlayed)
+      .map(createPlay.fromWord)
+      .filter(wordsAcrossAreValid(_))
   }
 
   private def wordFits(word: List[Tile], row: List[Option[Tile]]): Boolean =

@@ -1,6 +1,7 @@
 package net.pawel.scrabble
 
 import net.pawel.scrabble.load.{LoadBoard, LoadBoardDefinition}
+import net.pawel.scrabble.services.Words
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
@@ -44,8 +45,8 @@ class ScrabbleTest extends AnyFlatSpec with Matchers with MockitoSugar {
       |""".stripMargin
 
     val board = LoadBoard.fromString(boardString)
-    val game = Game(words, board)
-    val options = game.options(letters)
+    val game = Game(wordsService = words, board = board)
+    val options = game.options(letters).toList
     val optionWords = options.map(_.word.string())
     options.length shouldBe 12
     optionWords.toSet shouldBe Set(
@@ -85,8 +86,8 @@ class ScrabbleTest extends AnyFlatSpec with Matchers with MockitoSugar {
         |""".stripMargin
 
     val board = LoadBoard.fromString(boardString)
-    val game = Game(words, board)
-    val options = game.options("rebase").filter(play => play.word.string() == "rebase")
+    val game = Game(wordsService = words, board = board)
+    val options = game.options("rebase").filter(play => play.word.string() == "rebase").toList
     options.length shouldBe 1
     options.head.score(boardDefinition, board).score shouldBe 33
   }
@@ -119,9 +120,10 @@ class ScrabbleTest extends AnyFlatSpec with Matchers with MockitoSugar {
         |""".stripMargin
 
     val board = LoadBoard.fromString(boardString)
-    val game = Game(words, board)
-    val options = game.options(letters).filter(play => play.word.string() == "leeks" && play.word.row == 1)
+    val game = Game(wordsService = words, board = board)
+    val options = game.options(letters).filter(play => play.word.string() == "leeks" &&
+      play.word.row == 1).toList
     options.length shouldBe 1
-    options.head.score(boardDefinition, board).score shouldBe 41
+    options.toList.head.score(boardDefinition, board).score shouldBe 41
   }
 }

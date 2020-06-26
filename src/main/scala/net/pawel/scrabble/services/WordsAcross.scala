@@ -4,12 +4,6 @@ import net.pawel.scrabble._
 
 class WordsAcross(val board: Board, wordsService: Words) {
 
-  def acrossWordsAreValid(word: String, rowIndex: Int, columnIndex: Int,
-                          indicesWithinWord: List[Int]) = {
-    val words = acrossWords(word, rowIndex, columnIndex, indicesWithinWord)
-    words.map(_.string()).forall(wordsService.isValid)
-  }
-
   def acrossWords(word: String, rowIndex: Int, columnIndex: Int,
                   indicesWithinWord: List[Int]) = {
     def letterAt(i: Int) = word(i - columnIndex)

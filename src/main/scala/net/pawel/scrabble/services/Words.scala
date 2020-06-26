@@ -1,5 +1,8 @@
 package net.pawel.scrabble.services
 
+import java.io.{BufferedReader, BufferedWriter, PrintWriter}
+
+import net.pawel.scrabble.load.Files
 import net.pawel.scrabble.{Cell, WordPlayed}
 
 import scala.collection.immutable.TreeSet
@@ -7,18 +10,28 @@ import scala.io.Source
 
 
 object Words {
-  private val Filename = "/words.txt"
+  private val Filename = "words.txt"
+
+  private val WordsFile = Files.fileAt(s"src/main/resources/$Filename")
 
   private lazy val words = loadWords()
 
-  private def loadWords() = {
-    val inputStream = classOf[Cell].getResourceAsStream(Filename)
-    Source.fromInputStream(inputStream).getLines.map(_.toLowerCase).toList
-  }
+  private def loadWords() =
+    Source.fromFile(WordsFile).getLines.map(_.toLowerCase).toList
 
   def apply(words: List[String]) = new Words(words)
 
   def makeWords() = Words(words)
+
+  def remove(word: String) = {
+    val writer = new BufferedWriter(new PrintWriter(WordsFile))
+    words.filterNot(_ == word)
+      .map(_.toUpperCase)
+      .foreach(word => {
+        writer.write(word + "\n")
+      })
+    writer.close()
+  }
 }
 
 class Words(private val words: List[String]) {
@@ -29,9 +42,12 @@ class Words(private val words: List[String]) {
   def isValid(word: WordPlayed): Boolean = isValid(word.string())
 
   def wordsSpelledBy(letters: String) =
-    words.filter(possibleMatch(letters)).filter(exactMatch(letters))
+    iteratorWordsSpelledBy(letters).toList
 
-  private def possibleMatch(letters: String)(word: String) = 
+  def iteratorWordsSpelledBy(letters: String) =
+    words.iterator.filter(possibleMatch(letters)).filter(exactMatch(letters))
+
+  private def possibleMatch(letters: String)(word: String) =
     word.forall(letter => letters.contains(letter))
 
   private def exactMatch(letters: String)(word: String): Boolean =

@@ -1,73 +1,39 @@
 package net.pawel.scrabble
 
-import net.pawel.scrabble.load.{LoadBoard, LoadBoardDefinition, PrintBoard}
-import net.pawel.scrabble.services.{CalculateAdjacentWords, CalculateCrossingWords, Tiles, TilesWithAdjacents, Words, WordsAcross, WordsAcrossAreValid}
+import net.pawel.scrabble.load.{LoadBoard, LoadBoardDefinition, PrintBoard, SaveBoard}
+import net.pawel.scrabble.services.{CalculateAdjacentWords, CalculateCrossingWords, CalculateInitialWord, CreatePlay, Tiles, TilesWithAdjacents, Words, WordsAcross, WordsAcrossAreValid}
 
-object Main {
+import scala.io.StdIn
 
-  def runMain(letters: String, filename: String): Unit = {
-    val definition: BoardDefinition = LoadBoardDefinition()
-    val board = LoadBoard(filename).getOrElse(Board())
-    val words = Words.makeWords
-    val game = Game(words, board, definition)
-    mainLoop(game, letters)
-  }
-
-  def printOptions(options: List[ScoredPlay]) {
-    options.take(40).foreach(printOption)
-  }
-
-  def printOption(scoredPlay: ScoredPlay) {
-    val score = scoredPlay.score
-    val play = scoredPlay.play
-    val word = play.word
-    val row = word.row
-    val column = play.word.column
-    val string = play.word.string()
-    val direction = word.direction
-    val words = play.wordsAcross.map(_.string()).mkString(", ")
-    println(s"$score ($row, $column, $direction) $string : $words")
-  }
-
-  def mainLoop(game: Game, letters: String = "") = {
-    val options = game.sortedOptions(letters)
-    printOptions(options)
-  }
-
-  private def printGame(game: Game) = {
-    println(PrintBoard(game.board))
-  }
-
-  private def readLine() = Console.in.readLine()
-}
-
-case class Game(wordsService: Words = Words.makeWords(),
-                board: Board = Board(),
-                definition: BoardDefinition = LoadBoardDefinition()) {
+case class Game(board: Board = Board(),
+                definition: BoardDefinition = LoadBoardDefinition(),
+                wordsService: Words = Words.makeWords()) {
 
   def transposed(): Game = copy(board = board.transposed(), definition = definition.transposed())
 
   def sortedOptions(letters: String) =
-    options(letters).map(_.score(definition, board)).sortBy(_.score).reverse
+    options(letters).map(_.score(definition, board)).toList.sortBy(_.score).reverse
 
-  def options(letters: String): List[Play] = calculateOptions(letters) ::: transposedOptions(letters)
+  def options(letters: String): Iterator[Play] = calculateOptions(letters) ++ transposedOptions(letters)
 
   private def transposedOptions(letters: String) = transposed().calculateOptions(letters).map(_.transposed())
 
-  def calculateOptions(letters: String): List[Play] = {
-    val tilesWithAdjacents = new TilesWithAdjacents(board)
-    val wordsAcross = new WordsAcross(board, wordsService)
-    val calculateAdjacentWords = new CalculateAdjacentWords(this, tilesWithAdjacents, wordsAcross)
-    val wordsAcrossAreValid = new WordsAcrossAreValid(this, wordsService, wordsAcross, tilesWithAdjacents)
-    val calculateCrossingWords = new CalculateCrossingWords(this, wordsService, wordsAcrossAreValid)
+  def calculateOptions(letters: String): Iterator[Play] = {
+    if (board.isEmpty()) {
+      val calculateInitialWord = new CalculateInitialWord(this, wordsService)
 
-    val words = wordsService.wordsSpelledBy(letters)
-    (0 to 14).flatMap(rowIndex => {
-      calculateAdjacentWords.adjacentWordOptions(words, rowIndex) ++
-        calculateCrossingWords.calculateCrossingWords(letters, rowIndex)
-    }).toList
+      calculateInitialWord(letters)
+    } else {
+      val tilesWithAdjacents = new TilesWithAdjacents(board)
+      val wordsAcross = new WordsAcross(board, wordsService)
+      val wordsAcrossAreValid = new WordsAcrossAreValid(wordsService, wordsAcross)
+      val calculateAdjacentWords = new CalculateAdjacentWords(this, wordsService, tilesWithAdjacents, wordsAcross, wordsAcrossAreValid)
+      val createPlay = new CreatePlay(this, tilesWithAdjacents, wordsAcross)
+      val calculateCrossingWords = new CalculateCrossingWords(this, wordsService, wordsAcrossAreValid, createPlay)
+
+      calculateAdjacentWords(letters) ++ calculateCrossingWords(letters)
+    }
   }
-
 
   def update(word: String, rowIndex: Int, columnIndex: Int): Game = {
     val tiles = Tiles.tiles(word)

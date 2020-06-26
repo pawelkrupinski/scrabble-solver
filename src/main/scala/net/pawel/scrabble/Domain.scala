@@ -18,7 +18,7 @@ case class Tile(letter: Char, score: Int)
 case class Board(tiles: List[List[Option[Tile]]] = List.fill(15)(List.fill(15)(None))) {
   def transposed(): Board = copy(tiles = tiles.transpose)
 
-  def isEmpty() = tiles.map(_.count(_.isDefined)).sum == 0
+  def isEmpty() = tiles.forall(_.forall(_.isEmpty))
   def isNotEmpty() = !isEmpty()
 
   private val transposedTiles = tiles.transpose
