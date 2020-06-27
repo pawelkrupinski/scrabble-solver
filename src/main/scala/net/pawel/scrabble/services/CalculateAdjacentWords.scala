@@ -8,6 +8,7 @@ class CalculateAdjacentWords(val game: Game,
                              val wordsAcross: WordsAcross,
                              val wordsAcrossAreValid: WordsAcrossAreValid) {
   val Letters_For_Bonus = 7
+  val board = game.board
 
   def apply(letters: String): Iterator[Play] = {
     val words = wordsService.wordsSpelledBy(letters)
@@ -17,59 +18,57 @@ class CalculateAdjacentWords(val game: Game,
   }
 
   private def adjacentWordOptions(words: Iterator[String], rowIndex: Int): Iterator[Play] = {
-    val row = game.board.row(rowIndex)
-    val indices = tilesWithAdjacents.indicesOfCellsThatHaveAdjacents(rowIndex)
-    if (indices.isEmpty) Iterator.empty
-    else {
-      val firstIndex = indices.head
-      val lastIndex = indices.last
+    val indices = tilesWithAdjacents.indices(rowIndex)
+    if (indices.isEmpty)
+      Iterator.empty
+    else
       for (word <- words;
-            length = word.length;
-            start = scala.math.max(firstIndex - length + 1, 0);
-            end = scala.math.min(lastIndex, 14 - length + 1);
-            columnIndex <- (start to end).iterator;
-            result <- tryWord(word, rowIndex, columnIndex, row, indices).toList)
-        yield result
-    }
+           play <- wordInARow(word, rowIndex, indices)) yield
+        play
+  }
+
+  private def wordInARow(word: String, rowIndex: Int, indices: List[Int]) = {
+    val firstIndex = indices.head
+    val lastIndex = indices.last
+    val length = word.length;
+    val start = scala.math.max(firstIndex - length + 1, 0);
+    val end = scala.math.min(lastIndex, 14 - length + 1);
+    for (columnIndex <- (start to end).iterator;
+         result <- tryWord(word, rowIndex, columnIndex).toList)
+      yield result
   }
 
   private def doesNotExceedLengthOfTheRow(lastIndex: Int) = lastIndex < 15
 
-  private def coversAnIndexThatHasAdjacents(index: Int,
-                                            lastIndex: Int,
-                                            indicesThatHaveAdjacents: List[Int]) =
-    indicesThatHaveAdjacents.exists(i => index <= i && i <= lastIndex)
+  private def coversAnIndexThatHasAdjacents(rowIndex: Int,
+                                            firstColumnIndex: Int,
+                                            lastColumnIndex: Int) = {
+    val indices = tilesWithAdjacents.indices(rowIndex)
+    indices.exists(i => firstColumnIndex <= i && i <= lastColumnIndex)
+  }
 
   private def doesNotCoverPlacedTiles(index: Int,
                                       lastIndex: Int,
-                                      row: List[Option[Tile]]): Boolean =
+                                      rowIndex: Int): Boolean = {
+    val row = game.board.row(rowIndex)
     !(index to lastIndex).exists(row(_).isDefined)
+  }
 
   private def doesNotTouchPlacedTilesInRow(index: Int,
                                            lastIndex: Int,
-                                           row: List[Option[Tile]]): Boolean =
+                                           rowIndex: Int): Boolean = {
+    val row = board.row(rowIndex)
     (index == 0 || row(index - 1).isEmpty) && (lastIndex == 14 || row(lastIndex + 1).isEmpty)
+  }
 
-  private def formsValidWords(word: String,
-                              rowIndex: Int,
-                              columnIndex: Int,
-                              lastColumnIndex: Int,
-                              indicesThatHaveAdjacents: List[Int]): Boolean = {
-    val indices = tilesWithAdjacents.indicesWithinWord(columnIndex, lastColumnIndex,
-      indicesThatHaveAdjacents)
-
-   ;
-
-    wordsAcrossAreValid(word, rowIndex, columnIndex, indices)
+  private def formsValidWords(word: String, rowIndex: Int, columnIndex: Int) = {
+    wordsAcrossAreValid(word, rowIndex, columnIndex)
   }
 
   private def calculateWordsAcross(word: String,
                                    rowIndex: Int,
-                                   columnIndex: Int,
-                                   lastColumnIndex: Int,
-                                   indicesThatHaveAdjacents: List[Int]): List[WordPlayed] = {
-    val indices = tilesWithAdjacents.indicesWithinWord(columnIndex, lastColumnIndex,
-      indicesThatHaveAdjacents)
+                                   columnIndex: Int): List[WordPlayed] = {
+    val indices = tilesWithAdjacents.indicesWithinWord(rowIndex, columnIndex, word)
 
     def letterAt(i: Int): Char = word(i - columnIndex)
 
@@ -80,18 +79,16 @@ class CalculateAdjacentWords(val game: Game,
 
   private def tryWord(word: String,
                       rowIndex: Int,
-                      columnIndex: Int,
-                      row: List[Option[Tile]],
-                      indicesThatHaveAdjacents: List[Int]): Option[Play] = {
+                      columnIndex: Int) = {
     val lastColumnIndex = columnIndex + word.length - 1
     if (doesNotExceedLengthOfTheRow(lastColumnIndex) &&
-      coversAnIndexThatHasAdjacents(columnIndex, lastColumnIndex, indicesThatHaveAdjacents) &&
-      doesNotCoverPlacedTiles(columnIndex, lastColumnIndex, row) &&
-      doesNotTouchPlacedTilesInRow(columnIndex, lastColumnIndex, row) &&
-      formsValidWords(word, rowIndex, columnIndex, lastColumnIndex, indicesThatHaveAdjacents)) {
+      coversAnIndexThatHasAdjacents(rowIndex, columnIndex, lastColumnIndex) &&
+      doesNotCoverPlacedTiles(columnIndex, lastColumnIndex, rowIndex) &&
+      doesNotTouchPlacedTilesInRow(columnIndex, lastColumnIndex, rowIndex) &&
+      formsValidWords(word, rowIndex, columnIndex)) {
       val allLettersUsed = word.length == Letters_For_Bonus
       val wordPlayed = WordPlayed(rowIndex, columnIndex, Word(word), Across, allLettersUsed)
-      val words = calculateWordsAcross(word, rowIndex, columnIndex, lastColumnIndex, indicesThatHaveAdjacents)
+      val words = calculateWordsAcross(word, rowIndex, columnIndex)
       val newGame = game.update(word, rowIndex, columnIndex)
       Some(Play(newGame, wordPlayed, words))
     } else None

@@ -45,7 +45,7 @@ class ScrabbleTest extends AnyFlatSpec with Matchers with MockitoSugar {
       |""".stripMargin
 
     val board = LoadBoard.fromString(boardString)
-    val game = Game(wordsService = words, board = board)
+    val game = Game(board = board, wordsService = words)
     val options = game.options(letters).toList
     val optionWords = options.map(_.word.string())
     options.length shouldBe 12
@@ -86,7 +86,7 @@ class ScrabbleTest extends AnyFlatSpec with Matchers with MockitoSugar {
         |""".stripMargin
 
     val board = LoadBoard.fromString(boardString)
-    val game = Game(wordsService = words, board = board)
+    val game = Game(board = board, wordsService = words)
     val options = game.options("rebase").filter(play => play.word.string() == "rebase").toList
     options.length shouldBe 1
     options.head.score(boardDefinition, board).score shouldBe 33
@@ -120,7 +120,7 @@ class ScrabbleTest extends AnyFlatSpec with Matchers with MockitoSugar {
         |""".stripMargin
 
     val board = LoadBoard.fromString(boardString)
-    val game = Game(wordsService = words, board = board)
+    val game = Game(board = board, wordsService = words)
     val options = game.options(letters).filter(play => play.word.string() == "leeks" &&
       play.word.row == 1).toList
     options.length shouldBe 1

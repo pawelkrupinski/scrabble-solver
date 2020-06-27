@@ -2,12 +2,12 @@ package net.pawel.scrabble.services
 
 import net.pawel.scrabble._
 
-class WordsAcross(val board: Board, wordsService: Words) {
+class WordsAcross(private val board: Board,
+                  private val tilesWithAdjacents: TilesWithAdjacents) {
 
-  def acrossWords(word: String, rowIndex: Int, columnIndex: Int,
-                  indicesWithinWord: List[Int]) = {
+  def acrossWords(word: String, rowIndex: Int, columnIndex: Int): List[WordPlayed] = {
     def letterAt(i: Int) = word(i - columnIndex)
-
+    val indicesWithinWord = tilesWithAdjacents.indicesWithinWord(rowIndex, columnIndex, word)
     indicesWithinWord.map(index => acrossWord(rowIndex, index, letterAt(index)))
   }
 

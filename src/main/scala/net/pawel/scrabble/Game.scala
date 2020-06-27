@@ -6,8 +6,8 @@ import net.pawel.scrabble.services.{CalculateAdjacentWords, CalculateCrossingWor
 import scala.io.StdIn
 
 case class Game(board: Board = Board(),
-                definition: BoardDefinition = LoadBoardDefinition(),
-                wordsService: Words = Words.makeWords()) {
+                wordsService: Words = Words.makeWords(),
+                definition: BoardDefinition = LoadBoardDefinition()) {
 
   def transposed(): Game = copy(board = board.transposed(), definition = definition.transposed())
 
@@ -25,7 +25,7 @@ case class Game(board: Board = Board(),
       calculateInitialWord(letters)
     } else {
       val tilesWithAdjacents = new TilesWithAdjacents(board)
-      val wordsAcross = new WordsAcross(board, wordsService)
+      val wordsAcross = new WordsAcross(board, tilesWithAdjacents)
       val wordsAcrossAreValid = new WordsAcrossAreValid(wordsService, wordsAcross)
       val calculateAdjacentWords = new CalculateAdjacentWords(this, wordsService, tilesWithAdjacents, wordsAcross, wordsAcrossAreValid)
       val createPlay = new CreatePlay(this, tilesWithAdjacents, wordsAcross)

@@ -22,7 +22,7 @@ class ScoringTest extends AnyFlatSpec with Matchers with MockitoSugar {
       .add("swords", 7, 2)
       .add("rebased", 9, 1)
 
-    val game = Game(wordsService = words, board = board)
+    val game = Game(board = board, wordsService = words)
     val options = game.options("ze")
     val option = options.find(_.word.string() == "zoea").get
 

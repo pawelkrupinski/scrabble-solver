@@ -9,7 +9,7 @@ object Main {
   def runMain(filename: String): Unit = {
     val definition: BoardDefinition = LoadBoardDefinition()
     val board = LoadBoard(filename).getOrElse(Board())
-    val game = Game(board, definition)
+    val game = Game(board, definition = definition)
 
     val theirGame = if (board.isNotEmpty()) handleTheir(game) else game
 

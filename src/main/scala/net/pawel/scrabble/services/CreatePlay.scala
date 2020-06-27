@@ -8,10 +8,9 @@ class CreatePlay(private val game: Game,
 
   def fromWord(wordPlayed: WordPlayed) = {
     val rowIndex = wordPlayed.row
-    val indices = tilesWithAdjacents.tilesThatHaveAdjacentsWithinWord(rowIndex, wordPlayed)
     val columnIndex = wordPlayed.column
     val word = wordPlayed.string()
-    val words = wordsAcross.acrossWords(word, rowIndex, columnIndex, indices)
+    val words = wordsAcross.acrossWords(word, rowIndex, columnIndex)
     Play(game.update(word, rowIndex, columnIndex), wordPlayed, words)
   }
 }

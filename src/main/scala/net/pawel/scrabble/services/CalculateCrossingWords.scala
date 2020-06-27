@@ -17,7 +17,8 @@ class CalculateCrossingWords(private val game: Game,
     val lastIndex = ranges.length - 1
     for (startIndex <- 0 to lastIndex;
          endIndex <- startIndex to lastIndex;
-         result <- rangesSlice(ranges, startIndex, endIndex).options(rowIndex, row, letters))
+         result <- rangesSlice(ranges, startIndex, endIndex)
+           .options(rowIndex, row, letters))
       yield result
   }.iterator
 

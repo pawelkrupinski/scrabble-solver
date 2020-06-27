@@ -2,6 +2,8 @@ package net.pawel.scrabble.services
 
 import net.pawel.scrabble._
 
+import scala.math.{max, min}
+
 case class RangesSlice(private val ranges: List[Range],
                        private val firstRangeIndex: Int,
                        private val lastRangeIndex: Int,
@@ -22,6 +24,7 @@ case class RangesSlice(private val ranges: List[Range],
     val after = gapAfter()
     val startIndex = firstRange.startIndex
     val endIndex = lastRange.endIndex + 1
+
     val tiles: List[Option[Tile]] = row.slice(startIndex, endIndex)
     val rangeLetters = tiles.flatMap(_.toList.map(_.letter)).mkString("")
     val regex = tiles
@@ -65,8 +68,8 @@ case class RangesSlice(private val ranges: List[Range],
                            lengthForBonus: Int)(word: String): Iterator[Play] = {
     val tiles = Tiles.tiles(word)
     val wordLength = word.length
-    val start = columnStartIndex
-    val end = scala.math.min(14 - wordLength + 1, columnEndIndex - wordLength + 1)
+    val start = max(columnStartIndex, lastRange.endIndex - wordLength + 1)
+    val end = min(firstRange.startIndex, min(14 - wordLength + 1, columnEndIndex - wordLength + 1))
 
     def wordTouchesAnExistingLetter(columnIndex: Int) =
       row.slice(columnIndex, columnIndex + wordLength).exists(_.isDefined)
