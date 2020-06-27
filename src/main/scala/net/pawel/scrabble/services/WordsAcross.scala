@@ -6,7 +6,7 @@ class WordsAcross(private val board: Board,
                   private val tilesWithAdjacents: TilesWithAdjacents) {
 
   def acrossWords(word: String, rowIndex: Int, columnIndex: Int): List[WordPlayed] = {
-    def letterAt(i: Int) = word(i - columnIndex)
+    def letterAt(i: Int): Char = word(i - columnIndex)
     val indicesWithinWord = tilesWithAdjacents.indicesWithinWord(rowIndex, columnIndex, word)
     indicesWithinWord.map(index => acrossWord(rowIndex, index, letterAt(index)))
   }

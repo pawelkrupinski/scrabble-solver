@@ -27,7 +27,7 @@ class CalculateAdjacentWords(val game: Game,
         play
   }
 
-  private def wordInARow(word: String, rowIndex: Int, indices: List[Int]) = {
+  private def wordInARow(word: String, rowIndex: Int, indices: List[Int]): Iterator[Play] = {
     val firstIndex = indices.head
     val lastIndex = indices.last
     val length = word.length;
@@ -38,11 +38,11 @@ class CalculateAdjacentWords(val game: Game,
       yield result
   }
 
-  private def doesNotExceedLengthOfTheRow(lastIndex: Int) = lastIndex < 15
+  private def doesNotExceedLengthOfTheRow(lastIndex: Int): Boolean = lastIndex < 15
 
   private def coversAnIndexThatHasAdjacents(rowIndex: Int,
                                             firstColumnIndex: Int,
-                                            lastColumnIndex: Int) = {
+                                            lastColumnIndex: Int): Boolean = {
     val indices = tilesWithAdjacents.indices(rowIndex)
     indices.exists(i => firstColumnIndex <= i && i <= lastColumnIndex)
   }
@@ -79,7 +79,7 @@ class CalculateAdjacentWords(val game: Game,
 
   private def tryWord(word: String,
                       rowIndex: Int,
-                      columnIndex: Int) = {
+                      columnIndex: Int): Option[Play] = {
     val lastColumnIndex = columnIndex + word.length - 1
     if (doesNotExceedLengthOfTheRow(lastColumnIndex) &&
       coversAnIndexThatHasAdjacents(rowIndex, columnIndex, lastColumnIndex) &&

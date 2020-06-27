@@ -27,9 +27,11 @@ case class RangesSlice(private val ranges: List[Range],
 
     val tiles: List[Option[Tile]] = row.slice(startIndex, endIndex)
     val rangeLetters = tiles.flatMap(_.toList.map(_.letter)).mkString("")
+
     val regex = tiles
       .map(tile => tile.map(_.letter).getOrElse('.'))
       .mkString(s".{0,$before}", "", s".{0,$after}")
+
     val allLetters = rangeLetters + letters
     wordsService.iteratorWordsSpelledBy(allLetters)
       .filter(_.matches(regex))
