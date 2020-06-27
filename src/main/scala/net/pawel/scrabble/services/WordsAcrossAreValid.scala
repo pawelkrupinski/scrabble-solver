@@ -2,8 +2,6 @@ package net.pawel.scrabble.services
 
 import net.pawel.scrabble.{Play, WordPlayed}
 
-
-
 class WordsAcrossAreValid(private val wordsService: Words,
                           private val wordsAcross: WordsAcross) {
 

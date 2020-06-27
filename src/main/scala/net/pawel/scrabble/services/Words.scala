@@ -1,9 +1,9 @@
 package net.pawel.scrabble.services
 
-import java.io.{BufferedReader, BufferedWriter, PrintWriter}
+import java.io.{BufferedWriter, PrintWriter}
 
+import net.pawel.scrabble.WordPlayed
 import net.pawel.scrabble.load.Files
-import net.pawel.scrabble.{Cell, WordPlayed}
 
 import scala.collection.immutable.TreeSet
 import scala.io.Source

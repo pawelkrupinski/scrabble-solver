@@ -3,7 +3,6 @@ package net.pawel.scrabble.services
 import net.pawel.scrabble.{Game, Play, WordPlayed}
 
 class CreatePlay(private val game: Game,
-                 private val tilesWithAdjacents: TilesWithAdjacents,
                  private val wordsAcross: WordsAcross) {
 
   def fromWord(wordPlayed: WordPlayed) = {

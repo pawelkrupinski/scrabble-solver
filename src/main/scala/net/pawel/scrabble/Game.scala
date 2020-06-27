@@ -28,7 +28,7 @@ case class Game(board: Board = Board(),
       val wordsAcross = new WordsAcross(board, tilesWithAdjacents)
       val wordsAcrossAreValid = new WordsAcrossAreValid(wordsService, wordsAcross)
       val calculateAdjacentWords = new CalculateAdjacentWords(this, wordsService, tilesWithAdjacents, wordsAcross, wordsAcrossAreValid)
-      val createPlay = new CreatePlay(this, tilesWithAdjacents, wordsAcross)
+      val createPlay = new CreatePlay(this, wordsAcross)
       val calculateCrossingWords = new CalculateCrossingWords(this, wordsService, wordsAcrossAreValid, createPlay)
 
       calculateAdjacentWords(letters) ++ calculateCrossingWords(letters)
