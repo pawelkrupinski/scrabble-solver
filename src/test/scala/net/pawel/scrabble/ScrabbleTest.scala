@@ -124,6 +124,6 @@ class ScrabbleTest extends AnyFlatSpec with Matchers with MockitoSugar {
     val options = game.options(letters).filter(play => play.word.string() == "leeks" &&
       play.word.row == 1).toList
     options.length shouldBe 1
-    options.toList.head.score(boardDefinition, board).score shouldBe 41
+    options.head.score(boardDefinition, board).score shouldBe 41
   }
 }

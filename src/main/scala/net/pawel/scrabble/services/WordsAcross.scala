@@ -11,7 +11,7 @@ class WordsAcross(private val board: Board,
     indicesWithinWord.map(index => acrossWord(rowIndex, index, letterAt(index)))
   }
 
-  def acrossWord(rowIndex: Int, columnIndex: Int, char: Char) = {
+  private def acrossWord(rowIndex: Int, columnIndex: Int, char: Char) = {
     val column = board.column(columnIndex)
     val word = lettersBefore(column, rowIndex - 1, columnIndex) + char + lettersAfter(column, rowIndex + 1)
     word
